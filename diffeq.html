@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<!--  The following code is subject to the MIT license.  It may be used, shared, modified, etc. as long as it is shared under same license.   -->
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>DiffEQ Grapher</title>
+
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>DiffEQ Grapher</h1>
+
+d/dt <input type="text" id="var0" maxlength="1" size="1" onchange="initialize()"> = <input type="text" id="eq0" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini0" size="1" onChange="initialize()">, name:  <input type="text" id="name0" size="10" onChange="nameChange()">)<br>
+d/dt <input type="text" id="var1" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq1" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini1" size="1" onChange="initialize()">, name:  <input type="text" id="name1" size="10" onChange="nameChange()">)<br>
+d/dt <input type="text" id="var2" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq2" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini2" size="1" onChange="initialize()">, name:  <input type="text" id="name2" size="10" onChange="nameChange()">)<br>
+d/dt <input type="text" id="var3" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq3" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini3" size="1" onChange="initialize()">, name:  <input type="text" id="name3" size="10" onChange="nameChange()">)<br>
+
+<br>
+
+
+<br>
+
+<div id="tester" style="width:600px;height:450px;"></div>
+<br>
+
+
+
+<div class="slidecontainer">
+<table><tr><td>a = <span id = "aSliderValue"></span></td><td>b = <span id = "bSliderValue"></td></tr>
+<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="aslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="bslide" onInput="updatePlot()"></td></tr>
+</table>
+
+<table><tr><td>c = <span id = "cSliderValue"></span></td><td>d = <span id = "dSliderValue"></td></tr>
+<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="cslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="dslide" onInput="updatePlot()"></td></tr>
+</table>
+
+<table><tr><td>e = <span id = "eSliderValue"></span></td><td>f = <span id = "fSliderValue"></td></tr>
+<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="eslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="fslide" onInput="updatePlot()"></td></tr>
+</table>
+
+</div>
+
+
+Max t value:  <input type="text" id="maxt" size="3" value="10" onChange="initialize()"><br>
+Number of Iterations:  <input type="text" id="iter" size="3" value="100" onChange="initialize()"><br>
+Max y value:  <input type="text" id="maxy" size="3" value="100" onChange="initialize()"><br>
+
+Chart Title: <input type="text" id="chartTitle" size="15" onChange="initialize()"><br>
+t label:  <input type="text" id="tLabel" size="15" onChange="initialize()"><br>
+y label:  <input type="text" id="yLabel" size="15" onChange="initialize()"><br>
+
+<br>
+
+Link ( <button type="button" onclick="createLink()">update link</button> ) : <code><span id="link"> </span>  </code>
+
+
+<h2>About this program</h2>
+
+This javascript program solves systems of ordinary differential equations and graphs the solutions in realtime.  
+I'd recommend looking at the examples <a href="links.html">listed here</a> to get a feel for how it works.   It was designed for use 
+with <a href="https://oer.pressbooks.pub/informalcalculus/chapter/project-modelling-with-differential-equations/">this project from "Informal Calculus"</a>.
+
+
+	<script src="plotly-latest.min.js"></script>
+	<script src="math.min.js"></script>
+
+  <script>
+
+
+var diffeq1 = math.compile("a*A+b*B");
+console.log(diffeq1.evaluate({"a":1, A:2, b:3, B:4}));
+ 
+const letter = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+  
+const locate = "" + window.location;
+const beforeQ = locate.substring(0, locate.indexOf('?'));
+var afterQ = locate.substring(locate.indexOf('?')+1, locate.length);
+afterQ = afterQ.replace(/%20/gi, " ");
+const theInputs = afterQ.split("?");
+theInputs.reverse();
+ 
+const MARGIN = 35;
+ 
+var numOfEqsInputs = 4;
+var numOfSliders = 6;
+  
+var numOfEqs = 0;
+
+var maxt = 10;
+var dt = 0.1;
+
+var iter = 100;
+
+var maxy = 100;
+
+var chartTitle = "";
+var tLabel = "";
+var yLabel = "";
+
+
+
+function initializeInputArray(arr, name)
+{
+for(let i = 0; i < numOfEqsInputs; i++)
+	{
+	arr[i] = "";
+	if(name!=null)
+		arr[i] = name + " " + i;
+	
+	}
+
+} 
+
+
+var vars = [];
+initializeInputArray(vars);
+
+
+var eqs = [];
+initializeInputArray(eqs);
+
+var ceqs = [];
+
+var inis = [];
+initializeInputArray(inis);
+
+
+var names = []
+initializeInputArray(names, "Variable");
+
+var params = [];
+
+
+
+var theEqs = [];
+var theInis = [];
+var theData = [];
+
+
+
+function sliderSpread(num) {
+	return Math.pow(num/50.0, 3);
+	}
+
+function updateParameters()
+{
+for(let i = 0; i < numOfSliders; i++) {
+	params[i] = sliderSpread(parseFloat(document.getElementById(letter[i] + "slide").value));
+	document.getElementById(letter[i]+"SliderValue").innerHTML = math.round(params[i],4);
+	}
+}
+
+
+
+
+
+function initialize() {
+
+numOfEqs = 0;
+for(i = 0; i < numOfEqsInputs; i++){
+	if(document.getElementById("var" + i).value != "")
+		{
+		vars[i] = document.getElementById("var" + i).value;
+		eqs[i] = document.getElementById("eq" + i).value;
+		inis[i] = document.getElementById("ini" + i).value;
+		
+
+		
+		numOfEqs++;
+		}
+	}
+	
+
+for(j = 0; j < numOfEqs; j++)
+	{
+	ceqs[j] = math.compile(eqs[j]);
+	}
+
+
+theEqs = [];
+
+for(i = 0; i < numOfEqs; i++)
+	{
+	theEqs[i] = eval("eq" + i);
+	}
+
+
+for(i = 0; i < numOfEqs; i++)
+	{
+	theInis[i] = parseFloat(inis[i]);
+	}	
+
+
+maxt = parseFloat(document.getElementById("maxt").value);
+iter = parseInt(document.getElementById("iter").value);
+dt = maxt/iter;
+
+maxy = parseFloat(document.getElementById("maxy").value);
+
+chartTitle = document.getElementById("chartTitle").value;
+tLabel = document.getElementById("tLabel").value;
+yLabel = document.getElementById("yLabel").value;
+
+layout = {
+  title: chartTitle,
+  margin: {t: MARGIN, l: MARGIN, r: MARGIN, b: MARGIN},
+  xaxis: {title:  tLabel, range: [0, maxt]},
+  yaxis: {title:  yLabel, range: [0, maxy]}
+};
+
+
+
+createLink();
+updatePlot();
+
+}
+
+
+function nameChange() {
+for(let i = 0; i < 4; i++)
+	{
+	if(document.getElementById("name" + i).value != "")
+		names[i] = document.getElementById("name" + i).value;
+	}
+
+
+updatePlot();
+
+}
+
+
+
+
+function eq0(t, F) {
+var context = {[vars[0]]: F[0], [vars[1]]: F[1], [vars[2]]: F[2], [vars[3]]: F[3], "a": params[0], "b": params[1], "c": params[2], "d": params[3], "e": params[4], "f": params[5], "t": t}
+return ceqs[0].evaluate(context);
+}
+
+function eq1(t, F) {
+var context = {[vars[0]]: F[0], [vars[1]]: F[1], [vars[2]]: F[2], [vars[3]]: F[3], "a": params[0], "b": params[1], "c": params[2], "d": params[3], "e": params[4], "f": params[5], "t": t}
+return ceqs[1].evaluate(context);
+}
+
+
+function eq2(t, F) {
+var context = {[vars[0]]: F[0], [vars[1]]: F[1], [vars[2]]: F[2], [vars[3]]: F[3], "a": params[0], "b": params[1], "c": params[2], "d": params[3], "e": params[4], "f": params[5], "t": t}
+return ceqs[2].evaluate(context);
+}
+
+
+function eq3(t, F) {
+var context = {[vars[0]]: F[0], [vars[1]]: F[1], [vars[2]]: F[2], [vars[3]]: F[3], "a": params[0], "b": params[1], "c": params[2], "d": params[3], "e": params[4], "f": params[5], "t": t}
+return ceqs[3].evaluate(context);
+}
+
+
+
+
+function sumArrs(A1, A2) {
+var output = [];
+
+for(i = 0; i< Math.min(A1.length, A2.length); i++)
+	{
+	output[i] = A1[i] + A2[i];
+	}
+	
+return output;
+
+}
+
+
+function multArr(A, val)  {
+var output = [];
+
+for(i = 0; i< A.length; i++)
+	{
+	output[i] = A[i]*val;
+	}
+	
+return output;
+
+
+}
+
+
+
+function getNthFunction(F, n) {
+var output = [];
+
+for(k = 0; k < F.length; k++){
+
+	output[k] = F[k][n];
+	}
+
+return output;
+}
+
+
+
+
+function ODESolve(dF, f0, dt, tend)
+	{
+	var t = [0];
+	kend = parseInt(tend/dt);
+	
+	
+	var F = [];
+	for(let k = 0; k < kend; k++)
+		{
+		F[k] = [];
+		}
+		
+	for(let i = 0; i < dF.length; i++)
+		{
+		F[0][i] = f0[i];
+		}
+
+	
+
+for(let k = 1; k<kend; k++)
+		{
+		t[k] = t[k-1]+dt;
+		
+		var dF1 = [];
+		var dF2 = [];
+		var dF3 = [];
+		var dF4 = [];
+		
+		for(let i = 0; i < dF.length; i++){
+			dF1[i] = dF[i](t[k-1], F[k-1]);
+			}
+		
+		
+		for(let i = 0; i < dF.length; i++){
+			dF2[i] = dF[i](t[k-1]+dt/2, sumArrs(F[k-1], multArr(dF1, 0.5*dt)));
+			}
+			
+		for(let i = 0; i < dF.length; i++){
+			dF3[i] = dF[i](t[k-1]+dt/2, sumArrs(F[k-1], multArr(dF2, 0.5*dt)));
+			}
+			
+		for(let i = 0; i < dF.length; i++){
+			dF4[i] = dF[i](t[k-1]+dt, sumArrs(F[k-1], multArr(dF3, dt)));
+			}
+			
+		for(let i = 0; i < dF.length;  i++){
+			F[k][i] = F[k-1][i]+dt/6*(dF1[i]+2*dF2[i]+2*dF3[i]+dF4[i]);
+			}
+		
+		}
+		
+return {t, F};
+}
+
+
+
+
+
+
+
+
+
+function inputItems() {
+for(let i = 0; i < numOfEqsInputs; i++)
+	{
+	document.getElementById("var" + i).value = theInputs.pop();
+	document.getElementById("eq" + i).value = theInputs.pop();
+	document.getElementById("ini" + i).value = theInputs.pop();
+	document.getElementById("name" + i).value = theInputs.pop();
+	}
+	
+for(let i = 0; i < numOfSliders; i++)
+	{
+	document.getElementById(letter[i]+"slide").value = parseInt(theInputs.pop());
+	}
+
+updateParameters();
+
+document.getElementById("maxt").value = theInputs.pop();
+document.getElementById("iter").value = theInputs.pop();
+document.getElementById("maxy").value = theInputs.pop();
+
+
+document.getElementById("chartTitle").value = theInputs.pop();
+document.getElementById("tLabel").value = theInputs.pop();
+document.getElementById("yLabel").value = theInputs.pop();
+
+initialize();
+
+}
+
+
+function createLink()  {
+var link = beforeQ + "?";
+
+for(let i = 0; i < numOfEqsInputs; i++)
+	{
+	link += document.getElementById("var" + i).value + "?";
+	link += document.getElementById("eq" + i).value + "?";
+	link += document.getElementById("ini" + i).value + "?";
+	link += document.getElementById("name" + i).value + "?";
+	}
+	
+for(let i = 0; i < numOfSliders; i++)
+	{
+	link += document.getElementById(letter[i]+"slide").value + "?";
+	}
+
+link += document.getElementById("maxt").value + "?";
+link += document.getElementById("iter").value + "?";
+link += document.getElementById("maxy").value + "?";
+
+
+link += document.getElementById("chartTitle").value + "?";
+link += document.getElementById("tLabel").value + "?";
+link += document.getElementById("yLabel").value;
+
+document.getElementById("link").innerHTML = link;
+
+}
+
+
+var layout = {
+  title: chartTitle,
+  margin: {t: MARGIN, l: MARGIN, r: MARGIN, b: MARGIN},
+  xaxis: {title:  tLabel, range: [0, maxt]},
+  yaxis: {title:  yLabel, range: [0, maxy]}
+};
+
+
+
+var TESTER = document.getElementById('tester');
+
+
+var {t, F} = ODESolve(theEqs, theInis, 0.1, 10);
+
+
+var layout = {
+  title: chartTitle,
+  margin: {t: MARGIN, l: MARGIN, r: MARGIN, b: MARGIN},
+  xaxis: {title:  tLabel, range: [0, maxt]},
+  yaxis: {title:  yLabel, range: [0, maxy]}
+};
+
+Plotly.newPlot( TESTER, [{
+	x: t,
+	y: getNthFunction(F, 0) }], layout);
+
+
+
+
+
+function updatePlot() {
+
+updateParameters();
+
+var {t, F} = ODESolve(theEqs, theInis, dt, maxt);
+
+theData = [];
+
+for(let i = 0; i < numOfEqs; i++)
+	{
+	theData.push({x: t, y: getNthFunction(F, i), name: names[i]});
+	}
+
+
+Plotly.react( TESTER, theData, layout);
+	
+}
+
+
+
+
+
+
+if(theInputs.length==28)
+	inputItems();
+
+updateParameters();
+
+nameChange();
+
+layout = {
+  title: chartTitle,
+  margin: {t: MARGIN, l: MARGIN, r: MARGIN, b: MARGIN},
+  xaxis: {title:  tLabel, range: [0, maxt]},
+  yaxis: {title:  yLabel, range: [0, maxy]}
+};
+
+
+ </script>
+</body>
+</html>

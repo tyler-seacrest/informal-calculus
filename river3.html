@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<script language="JavaScript">
+DRAW0=false;
+DRAW1=false;
+DRAW2=false;
+x1 = 0;
+y1 = 0;
+OFFSET = -2;
+function doUpdate(event) {
+    pos_x = event.clientX;
+    pos_y = event.clientY;
+	width = (pos_x-165)/20;
+	depth = (pos_y-80)/20;
+	bot = -1/12850*Math.pow((width-12.91), 3)*(width-38.74)+6.5;
+	velocity = Math.round(1/200*(42.1-width)*Math.pow(width,2)*(1-Math.exp((depth-bot)*0.5)))/10;
+	document.getElementById("cross").style.left = (pos_x-12) ;
+	document.getElementById("cross").style.top = (pos_y-12) ;
+	document.getElementById("cross").style.visibility = "visible" ;
+
+	document.getElementById("Info").innerHTML = "Horizontal position:  " + width + " feet <br> Depth: " + depth + " feet <br>  Velocity: " + velocity + " feet/sec"; 
+
+
+	if(DRAW2){
+	DRAW2=false;
+	document.body.appendChild(createLine(x1+OFFSET, y1+OFFSET, pos_x+OFFSET, pos_y+OFFSET));
+	}
+	if(DRAW1){
+	DRAW1 = false;
+	DRAW2 = true;
+	x1 = pos_x;
+	y1 = pos_y;
+	}
+    if(DRAW0){
+        DRAW0=false;
+        DRAW1=true;
+    }
+}
+
+document.addEventListener("click", doUpdate);
+
+function createLineElement(x, y, length, angle) {
+    var line = document.createElement("div");
+    var styles = 'border: 1px solid red; '
+               + 'width: ' + length + 'px; '
+               + 'height: 0px; '
+               + '-moz-transform: rotate(' + angle + 'rad); '
+               + '-webkit-transform: rotate(' + angle + 'rad); '
+               + '-o-transform: rotate(' + angle + 'rad); '  
+               + '-ms-transform: rotate(' + angle + 'rad); '  
+               + 'position: absolute; '
+               + 'top: ' + y + 'px; '
+               + 'left: ' + x + 'px; ';
+    line.setAttribute('style', styles);  
+    return line;
+}
+
+function createLine(x1, y1, x2, y2) {
+    var a = x1 - x2,
+        b = y1 - y2,
+        c = Math.sqrt(a * a + b * b);
+
+    var sx = (x1 + x2) / 2,
+        sy = (y1 + y2) / 2;
+
+    var x = sx - c / 2,
+        y = sy;
+
+    var alpha = Math.PI - Math.atan2(-b, a);
+
+    return createLineElement(x, y, c, alpha);
+}
+
+document.body.appendChild(createLine(100, 150, 350, 850));
+</script>
+</head>
+<body>
+<form name="pointform" method="post">
+<div id="pointer_div" onclick="point_it(event)" style = "background-image:url('river2.png');width:1000px;height:273px;">
+<img src="point.png" id="cross" style="position:relative;visibility:hidden;z-index:2;"></div>
+<button type="button" onClick="DRAW0=true;">Draw a Line</button>
+<p id="Info"></p>
+
+</form> 
+
+
+<h2>Directions</h2>
+
+This simple javascript page is intended to be used with 
+<a href="https://oer.pressbooks.pub/informalcalculus/chapter/project-measuring-streamflow/">this project from "Informal Calculus"</a>.   
+The main question behind the project is to find the streamflow or discharge of this river in cubic feet per second.
+The diagram above represents a cross-section of the river.   Click anywhere in the river (under the "surface") 
+to get a horizontal position, depth, and water velocity.  If you get a negative depth, velocity, or horizontal position, you're  most likely not clicking
+in within the river as intended. <br><br>
+
+To help divide the river into sections, you can use the "Draw a Line" button.  Click the button, then click twice more  and a red line will be drawn between 
+the latter two clicks.   There is no way to erase a line except to erase all lines by refreshing the page.
+
+
+
+</body>
+
+
+
+</html>
