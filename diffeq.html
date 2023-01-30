@@ -12,16 +12,24 @@
     body {
       font-family: sans-serif;
     }
+	input[type="range"] {
+	width: 250px;
+	margin: 0;
+	}
+	
   </style>
 </head>
 <body>
   <h1>DiffEQ Grapher</h1>
 
-d/dt <input type="text" id="var0" maxlength="1" size="1" onchange="initialize()"> = <input type="text" id="eq0" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini0" size="1" onChange="initialize()">, name:  <input type="text" id="name0" size="10" onChange="nameChange()">)<br>
-d/dt <input type="text" id="var1" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq1" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini1" size="1" onChange="initialize()">, name:  <input type="text" id="name1" size="10" onChange="nameChange()">)<br>
-d/dt <input type="text" id="var2" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq2" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini2" size="1" onChange="initialize()">, name:  <input type="text" id="name2" size="10" onChange="nameChange()">)<br>
-d/dt <input type="text" id="var3" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq3" size="24" onChange="initialize()"> (initial value:  <input type="text" id="ini3" size="1" onChange="initialize()">, name:  <input type="text" id="name3" size="10" onChange="nameChange()">)<br>
-
+d/dt <input type="text" id="var0" maxlength="1" size="1" onchange="initialize()"> = <input type="text" id="eq0" size="24" onChange="initialize()"> name:  <input type="text" id="name0" size="10" onChange="nameChange()"><br>
+&nbsp &nbsp &nbsp initial value:  <span id = "ini0val">10</span> <input type="range" min="0" max="200" value="10" class="slider" id="ini0" onInput="updatePlot()"> <br>
+d/dt <input type="text" id="var1" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq1" size="24" onChange="initialize()"> name:  <input type="text" id="name1" size="10" onChange="nameChange()"><br>
+&nbsp &nbsp &nbsp initial value:  <span id = "ini1val">10</span> <input type="range" min="0" max="200" value="10" class="slider" id="ini1" onInput="updatePlot()"><br>
+d/dt <input type="text" id="var2" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq2" size="24" onChange="initialize()"> name:  <input type="text" id="name2" size="10" onChange="nameChange()"><br>
+&nbsp &nbsp &nbsp initial value:  <span id = "ini2val">10</span> <input type="range" min="0" max="200" value="10" class="slider" id="ini2" onInput="updatePlot()"><br>
+d/dt <input type="text" id="var3" maxlength="1" size="1" onChange="initialize()"> = <input type="text" id="eq3" size="24" onChange="initialize()"> name:  <input type="text" id="name3" size="10" onChange="nameChange()"><br>
+&nbsp &nbsp &nbsp initial value:  <span id = "ini3val">10</span> <input type="range" min="0" max="200" value="10" class="slider" id="ini3" onInput="updatePlot()">
 <br>
 
 
@@ -34,15 +42,15 @@ d/dt <input type="text" id="var3" maxlength="1" size="1" onChange="initialize()"
 
 <div class="slidecontainer">
 <table><tr><td>a = <span id = "aSliderValue"></span></td><td>b = <span id = "bSliderValue"></td></tr>
-<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="aslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="bslide" onInput="updatePlot()"></td></tr>
+<tr><td><input type="range" min="-200" max="200" value="10" class="slider" id="aslide" onInput="updatePlot()"></td><td><input type="range" min="-200" max="200" value="10" class="slider" id="bslide" onInput="updatePlot()"></td></tr>
 </table>
 
 <table><tr><td>c = <span id = "cSliderValue"></span></td><td>d = <span id = "dSliderValue"></td></tr>
-<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="cslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="dslide" onInput="updatePlot()"></td></tr>
+<tr><td><input type="range" min="-200" max="200" value="10" class="slider" id="cslide" onInput="updatePlot()"></td><td><input type="range" min="-200" max="200" value="10" class="slider" id="dslide" onInput="updatePlot()"></td></tr>
 </table>
 
 <table><tr><td>e = <span id = "eSliderValue"></span></td><td>f = <span id = "fSliderValue"></td></tr>
-<tr><td><input type="range" min="-50" max="50" value="10" class="slider" id="eslide" onInput="updatePlot()"></td><td><input type="range" min="-50" max="50" value="10" class="slider" id="fslide" onInput="updatePlot()"></td></tr>
+<tr><td><input type="range" min="-200" max="200" value="10" class="slider" id="eslide" onInput="updatePlot()"></td><td><input type="range" min="-200" max="200" value="10" class="slider" id="fslide" onInput="updatePlot()"></td></tr>
 </table>
 
 </div>
@@ -74,8 +82,6 @@ with <a href="https://oer.pressbooks.pub/informalcalculus/chapter/project-modell
   <script>
 
 
-var diffeq1 = math.compile("a*A+b*B");
-console.log(diffeq1.evaluate({"a":1, A:2, b:3, B:4}));
  
 const letter = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
   
@@ -146,7 +152,11 @@ var theData = [];
 
 
 function sliderSpread(num) {
-	return Math.pow(num/50.0, 3);
+	return Math.pow(num/200.0, 5);
+	}
+
+function sliderIniSpread(num) {
+	return num*maxy/200.0;
 	}
 
 function updateParameters()
@@ -154,6 +164,15 @@ function updateParameters()
 for(let i = 0; i < numOfSliders; i++) {
 	params[i] = sliderSpread(parseFloat(document.getElementById(letter[i] + "slide").value));
 	document.getElementById(letter[i]+"SliderValue").innerHTML = math.round(params[i],4);
+	}
+	
+for(let i = 0; i < numOfEqsInputs; i++)  {
+	theInis[i] = sliderIniSpread(parseFloat(document.getElementById("ini"+i).value));
+	let dis = math.round(theInis[i], 0);
+	if(dis < 10){
+		dis = "0" + dis;
+		}
+	document.getElementById("ini" + i + "val").innerHTML = dis;
 	}
 }
 
