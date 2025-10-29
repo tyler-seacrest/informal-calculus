@@ -1,0 +1,88 @@
+<html>
+<head>
+<script language="JavaScript">
+DRAW0=false;
+DRAW1=false;
+DRAW2=false;
+x1 = 0;
+y1 = 0;
+OFFSET = -2;
+function doUpdate(event) {
+    pos_x = event.clientX;
+    pos_y = event.clientY;
+	width = (pos_x-83)/20;
+	depth = (pos_y-50)/20;
+	bot = -1/12850*Math.pow((width-8), 2)*(width-38.74)*(width-38.74)+7.47;
+	velocity = Math.round(1/6.8*(46.2-width)*width*(1-Math.exp((depth-bot)*0.5)))/10;
+	document.getElementById("cross").style.left = (pos_x-12) ;
+	document.getElementById("cross").style.top = (pos_y-12) ;
+	document.getElementById("cross").style.visibility = "visible" ;
+
+	document.getElementById("Info").innerHTML = "Horizontal position:  " + width + " feet <br> Depth: " + depth + " feet <br>  Velocity: " + velocity + " feet/sec"; 
+
+
+	if(DRAW2){
+	DRAW2=false;
+	document.body.appendChild(createLine(x1+OFFSET, y1+OFFSET, pos_x+OFFSET, pos_y+OFFSET));
+	}
+	if(DRAW1){
+	DRAW1 = false;
+	DRAW2 = true;
+	x1 = pos_x;
+	y1 = pos_y;
+	}
+    if(DRAW0){
+        DRAW0=false;
+        DRAW1=true;
+    }
+}
+
+document.addEventListener("click", doUpdate);
+
+function createLineElement(x, y, length, angle) {
+    var line = document.createElement("div");
+    var styles = 'border: 1px solid red; '
+               + 'width: ' + length + 'px; '
+               + 'height: 0px; '
+               + '-moz-transform: rotate(' + angle + 'rad); '
+               + '-webkit-transform: rotate(' + angle + 'rad); '
+               + '-o-transform: rotate(' + angle + 'rad); '  
+               + '-ms-transform: rotate(' + angle + 'rad); '  
+               + 'position: absolute; '
+               + 'top: ' + y + 'px; '
+               + 'left: ' + x + 'px; ';
+    line.setAttribute('style', styles);  
+    return line;
+}
+
+function createLine(x1, y1, x2, y2) {
+    var a = x1 - x2,
+        b = y1 - y2,
+        c = Math.sqrt(a * a + b * b);
+
+    var sx = (x1 + x2) / 2,
+        sy = (y1 + y2) / 2;
+
+    var x = sx - c / 2,
+        y = sy;
+
+    var alpha = Math.PI - Math.atan2(-b, a);
+
+    return createLineElement(x, y, c, alpha);
+}
+
+document.body.appendChild(createLine(100, 150, 350, 850));
+</script>
+</head>
+<body>
+<form name="pointform" method="post">
+<div id="pointer_div" onclick="point_it(event)" style = "background-image:url('river4.png');width:1000px;height:186px;">
+<img src="point.png" id="cross" style="position:relative;visibility:hidden;z-index:2;"></div>
+<button type="button" onClick="DRAW0=true;">Draw a Line</button>
+<p id="Info"></p>
+
+</form> 
+</body>
+
+
+</html>
